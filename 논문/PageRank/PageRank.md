@@ -1,6 +1,4 @@
-![[pagerank.pdf]]
-
-
+![[/논문/PageRank/자료/pagerank.pdf]]
 # 논문이 나오게 된 배경
 
 1. 초기 웹의 상황:
@@ -123,7 +121,7 @@ $$PR(A) = \sum\frac{PR(T_i)}{C(T_i)}$$
 - $PR(A)$는 페이지 $A$의 PageRank 값
 - $PR(T_i)$는 페이지 $A$로 링크하는 각 페이지 $T_i$의 PageRank 값
 - $C(T_i)$는 페이지 $T_i$에서 나가는 링크의 총 개수
-![[Pasted image 20240812141715.png]]
+![[/논문/PageRank/자료/Pasted image 20240812141715.png]]
 식으로 보니까 어려운데 그림으로 보면 바로 이해될것임.
 이 공식은 한 페이지의 PageRank 값이 그 페이지로 링크하는 다른 페이지들의 PageRank 값에 비례한다는 개념을 나타냄. 
 
@@ -136,7 +134,7 @@ $$PR(A) = (1-d) + d * \sum \frac{PR(T_i)}{C(T_i)}$$
 - $(1-d)$는 모든 페이지가 가지는 최소 PageRank 값
 
 ### 실제로 내가 돌려본 값
-![[Pasted image 20240812154712.png]]
+![[/논문/PageRank/자료/Pasted image 20240812154712.png]]
 아무렇게나 피그마 열어서 그래프를 그림. 왼쪽 위부터 1~8까지 번호를 매기고, 연결 상태를 행렬로 나타내면 아래 array처럼 나옴.
 ``` python
 import numpy as np
@@ -211,7 +209,7 @@ Final PageRank:
 Page 1: 0.3282 Page 2: 0.1582 Page 3: 0.0317 Page 4: 0.0277 
 Page 5: 0.3641 Page 6: 0.0277 Page 7: 0.0317 Page 8: 0.0305
 ```
-![[Pasted image 20240812154845.png]]
+![[/논문/PageRank/자료/Pasted image 20240812154845.png]]
 예상대로, 많이 인용되는 page 5가 가장 rank가 높음을 알 수 있음. 1은 가장 높은 5에서 출발하는 edge가 유일하게 존재하기 때문에 두번째로 높음.
 ## 5-7장
 PageRank 알고리즘의 효과를 뒷받침하고 있음.
