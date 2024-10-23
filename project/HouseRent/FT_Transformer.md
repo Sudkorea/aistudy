@@ -51,6 +51,98 @@
 - Self-Attention 메커니즘을 통해 데이터 간의 중요한 상호작용을 놓치지 않음.  
 - 여러 외부 데이터를 통합해 활용할 수 있어 다양한 예측 모델에 적합함.
 
+
+---
+## model_training.py를 분석해보자
+
+### 1. 모델 아키텍처 (FTTransformer 클래스)
+```python:src/model_training.py
+class FTTransformer(nn.Module):
+    def __init__(self, input_dim, num_heads, num_layers, d_model, d_ff, dropout):
+        super(FTTransformer, self).__init__()
+        # 1. 입력 임베딩 레이어
+        self.embedding = nn.Linear(input_dim, d_model)
+        
+        # 2. 트랜스포머 인코더 레이어 설정
+        encoder_layer = nn.TransformerEncoderLayer(
+            d_model=d_model,      # 모델의 차원
+            nhead=num_heads,      # 멀티헤드 어텐션의 헤드 수
+            dim_feedforward=d_ff, # 피드포워드 네트워크의 차원
+            dropout=dropout,      # 드롭아웃 비율
+            batch_first=True      # 배치 차원을 첫번째로 설정
+        )
+        
+        # 3. 전체 트랜스포머 인코더 구성
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        
+        # 4. 출력 레이어
+        self.fc = nn.Linear(d_model, 1)
+```
+
+### 2. 모델 학습 함수 (train_ft_transformer)
+```python:src/model_training.py
+def train_ft_transformer(X_train, y_train, X_holdout, y_holdout, config):
+    # 1. 데이터 준비
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    X_train = torch.FloatTensor(X_train)
+    y_train = torch.FloatTensor(y_train)
+    
+    # 2. 데이터로더 설정
+    train_dataset = TensorDataset(X_train, y_train)
+    train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True)
+    
+    # 3. 모델 초기화
+    model = FTTransformer(
+        input_dim=X_train.shape[1],
+        num_heads=config['num_heads'],
+        num_layers=config['num_layers'],
+        d_model=config['d_model'],
+        d_ff=config['d_ff'],
+        dropout=config['dropout_rate']
+    ).to(device)
+    
+    # 4. 손실 함수와 옵티마이저 설정
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=config['learning_rate'])
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5)
+```
+
+### 3. 평가 함수 (evaluate_model)
+```python:src/model_training.py
+def evaluate_model(model, X_holdout, y_holdout):
+    # 1. 예측 수행
+    predictions = []
+    with torch.no_grad():
+        for batch_X, batch_y in holdout_loader:
+            batch_pred = model(batch_X).cpu().numpy()
+            predictions.extend(batch_pred)
+    
+    # 2. 평가 지표 계산
+    mae = mean_absolute_error(true_values, predictions)
+    rmse = np.sqrt(mean_squared_error(true_values, predictions))
+    r2 = r2_score(true_values, predictions)
+```
+
+### 주요 구성 요소 설명:
+
+1. **모델 구조**:
+- 입력 임베딩: 원본 특성을 d_model 차원으로 변환
+- 트랜스포머 인코더: 멀티헤드 어텐션과 피드포워드 네트워크로 구성
+- 출력 레이어: 최종 예측값 생성
+
+2. **학습 프로세스**:
+- 데이터 준비: 텐서 변환 및 데이터로더 설정
+- 모델 초기화: 하이퍼파라미터 설정
+- 학습 루프: 배치 단위 학습 및 검증
+- 학습률 조정: ReduceLROnPlateau 스케줄러 사용
+
+3. **평가 과정**:
+- 홀드아웃 세트에 대한 예측
+- MAE, RMSE, R² 지표 계산
+
+이 모델은 특히 테이블 데이터에 대한 회귀 문제를 해결하도록 설계되었으며, 트랜스포머의 셀프어탠션 메커니즘을 활용하여 특성 간의 복잡한 관계를 학습함
+
+
 ## 실험
 
 **MAE vs. MSE 학습의 차이**
