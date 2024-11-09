@@ -3,6 +3,9 @@
 
 그래프에 대한 흥미를 바탕으로, 그래프 딥러닝 모델의 변천사를 쭉 공부해보자.
 
+- GCN
+	- SEMI-SUPERVISED CLASSIFICATION WITH GRAPH CONVOLUTIONAL NETWORKS.
+
 - **GC-MC (Graph Convolutional Matrix Completion)**
     
     - 논문: "Graph Convolutional Matrix Completion" (2017) - Berg et al.
