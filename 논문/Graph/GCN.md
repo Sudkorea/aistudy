@@ -66,7 +66,7 @@ $\therefore \tilde{L} = D^{-\frac{1}{2}}LD^{-\frac{1}{2}}$
 
 $$\tilde{L} = U \Lambda U^T$$
 
-여기서:
+당연하겠지만,
 - $U$: $\tilde{L}$의 eigenvector들로 구성된 행렬
 - $\Lambda$: $\tilde{L}$의 eigenvalue들을 대각선으로 가지는 대각 행렬
 
