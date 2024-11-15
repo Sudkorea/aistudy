@@ -79,3 +79,17 @@ MC를 사용하는 다른 갈래는 RNN에 이식한 형태임. GRU4Rec는 클�
 2시간 후딱갔네
 
 # 3. METHODOLOGY
+
+|                            Notation                            | Description |
+| :------------------------------------------------------------: | :---------- |
+|                   $\mathcal{U}, \mathcal{I}$                   | 유저, 아이템셋    |
+|                       $\mathcal{S}^{u}$                        |             |
+|                       $d \in \mathbb{N}$                       |             |
+|                       $n \in \mathbb{N}$                       |             |
+|                       $b \in \mathbb{N}$                       |             |
+| $\mathsf{M} \in \mathbb{R}^{\vert \mathcal{I}\vert \times d }$ |             |
+|           $\mathsf{P} \in \mathbb{R}^{n \times d }$            |             |
+|        $\hat{\mathsf{E}} \in \mathbb{R}^{n \times d }$         |             |
+|        $\mathsf{S} ^{(b)} \in \mathbb{R}^{n \times d }$        |             |
+|       $\mathsf{F} ^{(b)}  \in \mathbb{R}^{n \times d }$        |             |
+
