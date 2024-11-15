@@ -79,6 +79,7 @@ MC를 사용하는 다른 갈래는 RNN에 이식한 형태임. GRU4Rec는 클�
 2시간 후딱갔네
 
 # 3. METHODOLOGY
+여기 LaTEX 쓸일이 너무 많아서, 내가 정리하고, gpt가 수식이랑 문장 다듬어준 버전으로 올려놓음.
 
 ## Notation
 
@@ -94,7 +95,7 @@ MC를 사용하는 다른 갈래는 RNN에 이식한 형태임. GRU4Rec는 클�
 |        $\hat{\mathsf{E}} \in \mathbb{R}^{n \times d }$         | input embedding matrix                                                                                                                                          |
 |        $\mathsf{S} ^{(b)} \in \mathbb{R}^{n \times d }$        | b번째 self-attention layer 이후 아이템 임베딩                                                                                                                             |
 |       $\mathsf{F} ^{(b)}  \in \mathbb{R}^{n \times d }$        | b번째 feed-forward network 이후 embedding network                                                                                                                   |
-
+이건 직접 만듦
 ### GPT 답변(P, F^b 이해가 안가서 정리해둠.)
 
 #### **1. Positional Embedding Matrix ($\mathsf{P}$)**
@@ -163,4 +164,43 @@ $$
 이 식은 각 위치 $i$에서 아이템 embedding $\mathsf{M}_{s_i}$와 위치 embedding $\mathsf{P}_i$를 더해 sequence의 최종 embedding $\hat{\mathsf{E}}$을 형성함.
 
 논문 작성자가 fixed positional embedding을 시도했으나, 실험 결과 dynamic positional embedding(위치마다 학습된 embedding)을 사용하는 것이 더 나은 성능을 보여준다고 보고했음. 이는 SASRec에서 sequence 내에서 각 위치에 맞는 특성을 학습하는 데 도움이 되었다고 볼 수 있음.
+
+## b. Self-Attention Block
+
+### Scaled Dot-Product Attention
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^\top}{\sqrt{d}}\right)V
+$$
+
+- $Q$ (Query), $K$ (Key), $V$ (Value)는 input embedding $\hat{\mathsf{E}}$를 변환한 행렬
+- $\frac{Q K^\top}{\sqrt{d}}$: Query와 Key 간의 유사도를 측정하고, $\sqrt{d}$로 나눠 계산의 스케일을 안정화시킴
+- $\text{softmax}$: 유사도를 확률로 변환하여 각 Query가 Key에 얼마나 집중할지 결정함
+- $V$: Value는 실제로 모델이 집중할 정보의 내용을 담음
+
+### Self-Attention Layer
+NLP에서는 보통 $K = V$로 설정함. 이 논문에서도 이 점을 따르며, SASRec에서는 $\hat{\mathsf{E}}$를 input으로 사용하여 self-attention을 정의함.
+
+$$
+\mathsf{S} = \text{SA}(\hat{\mathsf{E}}) = \text{Attention}(Q, K, V)
+$$
+
+여기서:
+- $Q = \hat{\mathsf{E}} \mathsf{W}^Q$, $K = \hat{\mathsf{E}} \mathsf{W}^K$, $V = \hat{\mathsf{E}} \mathsf{W}^V$
+- $\mathsf{W}^Q$, $\mathsf{W}^K$, $\mathsf{W}^V$는 각각 $d \times d$ 크기의 학습 가능한 행렬로, 모델이 sequence 내의 관계를 유연하게 학습하도록 도움.
+
+### Causality
+
+Self-attention에서 각 아이템 embedding $\mathsf{S}_t$는 모든 이전 아이템뿐만 아니라, 이후 아이템(subsequent items)의 정보까지 반영하게 됨. 하지만 SASRec의 목표는 **t+1번째 아이템을 예측하기 위해 t번째까지의 정보만 사용하는 것**이므로, 이후 아이템 정보를 포함하는 것은 문제를 잘못 정의하는 것이 됨.
+
+이를 해결하기 위해 논문에서는 **causality constraint**를 도입하는데, 이 제약은 Query ($Q_i$)와 Key ($K_i$) 간 연결을 제한해, 시간순으로 미래의 정보가 과거에 영향을 미치지 못하게 함.
+
+이를 구현하기 위해 **masking**을 적용하여, $t$ 시점 이전 정보에만 접근할 수 있도록 하는데,
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^\top}{\sqrt{d}} + \mathsf{M}\right)V
+$$
+
+- $\mathsf{M}$은 **masking matrix**로, 이후 시점의 정보를 차단하는 역할을 한다. 예를 들어, $M_{ij} = -\infty$로 설정하면, softmax 계산에서 해당 위치의 값이 0으로 설정됨.
+- 이로 인해 모델은 과거 정보에만 집중하며, 미래 정보를 포함하지 않도록 보장됨.
 
