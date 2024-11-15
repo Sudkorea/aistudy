@@ -80,16 +80,87 @@ MC를 사용하는 다른 갈래는 RNN에 이식한 형태임. GRU4Rec는 클�
 
 # 3. METHODOLOGY
 
-|                            Notation                            | Description |
-| :------------------------------------------------------------: | :---------- |
-|                   $\mathcal{U}, \mathcal{I}$                   | 유저, 아이템셋    |
-|                       $\mathcal{S}^{u}$                        |             |
-|                       $d \in \mathbb{N}$                       |             |
-|                       $n \in \mathbb{N}$                       |             |
-|                       $b \in \mathbb{N}$                       |             |
-| $\mathsf{M} \in \mathbb{R}^{\vert \mathcal{I}\vert \times d }$ |             |
-|           $\mathsf{P} \in \mathbb{R}^{n \times d }$            |             |
-|        $\hat{\mathsf{E}} \in \mathbb{R}^{n \times d }$         |             |
-|        $\mathsf{S} ^{(b)} \in \mathbb{R}^{n \times d }$        |             |
-|       $\mathsf{F} ^{(b)}  \in \mathbb{R}^{n \times d }$        |             |
+## Notation
+
+|                            Notation                            | Description                                                                                                                                                     |
+| :------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                   $\mathcal{U}, \mathcal{I}$                   | 유저, 아이템셋                                                                                                                                                        |
+|                       $\mathcal{S}^{u}$                        | 유저 u에 대한 historical interaction sequence. <br>이제 이걸 시간순으로 나타내면 $(\mathcal{S}^{u}_{1}, \mathcal{S}^{u}_{2}, ..., \mathcal{S}^{u}_{\vert \mathcal{S}^{u} \vert})$ |
+|                       $d \in \mathbb{N}$                       | 임베딩벡터 차원                                                                                                                                                        |
+|                       $n \in \mathbb{N}$                       | 최대 수열 길이                                                                                                                                                        |
+|                       $b \in \mathbb{N}$                       | self-attention block 개수                                                                                                                                         |
+| $\mathsf{M} \in \mathbb{R}^{\vert \mathcal{I}\vert \times d }$ | item enbedding matrix                                                                                                                                           |
+|           $\mathsf{P} \in \mathbb{R}^{n \times d }$            | positional embedding matrix                                                                                                                                     |
+|        $\hat{\mathsf{E}} \in \mathbb{R}^{n \times d }$         | input embedding matrix                                                                                                                                          |
+|        $\mathsf{S} ^{(b)} \in \mathbb{R}^{n \times d }$        | b번째 self-attention layer 이후 아이템 임베딩                                                                                                                             |
+|       $\mathsf{F} ^{(b)}  \in \mathbb{R}^{n \times d }$        | b번째 feed-forward network 이후 embedding network                                                                                                                   |
+
+### GPT 답변(P, F^b 이해가 안가서 정리해둠.)
+
+#### **1. Positional Embedding Matrix ($\mathsf{P}$)**
+
+##### **역할**
+- **Transformer 구조**에서 sequence 데이터의 순서를 표현하기 위해 도입된 개념입니다.
+- Self-attention 메커니즘은 각 위치의 데이터 간 관계를 계산하지만, **위치 정보**(순서)를 내재적으로 고려하지는 않습니다. 이를 해결하기 위해 각 아이템의 위치 정보를 나타내는 **positional embedding**을 추가합니다.
+
+##### **SASRec에서의 활용**
+- $\mathsf{P} \in \mathbb{R}^{n \times d}$: 길이 $n$의 sequence에서 각 위치(1번째, 2번째, ..., $n$번째)에 대한 $d$차원의 embedding을 저장합니다.
+- $\hat{\mathsf{E}} = \mathsf{E} + \mathsf{P}$ 형태로, positional embedding을 input embedding에 더해줍니다.
+  - 여기서 $\mathsf{E}$는 item embedding matrix에서 나온 값입니다.
+- 결과적으로, $\mathsf{P}$는 아이템 간 상대적인 순서를 모델에 알려주는 역할을 합니다.
+
+##### **직관적인 이해**
+예를 들어, 아이템 $i_1$, $i_2$, $i_3$의 embedding은 같을 수 있지만, $i_1$이 sequence의 첫 번째 위치에 있는지, 두 번째 위치에 있는지를 $\mathsf{P}$가 알려줍니다.
+
+---
+
+#### **2. Feed-Forward Network ($\mathsf{F}$)**
+
+##### **역할**
+- Self-attention layer를 통과한 아이템 embedding $\mathsf{S}^{(b)}$에 대해, 각 아이템의 embedding을 더 복잡한 표현으로 변환합니다.
+- 이 과정은 **비선형 변환**을 통해 embedding의 표현력을 높이는 역할을 합니다.
+
+##### **구조**
+Feed-forward network는 주로 다음 두 단계로 구성됩니다:
+1. 선형 변환 (Fully Connected Layer): $\mathbb{R}^d \to \mathbb{R}^{d_{\text{hidden}}}$
+   - 아이템 embedding을 더 높은 차원으로 변환합니다.
+2. 활성화 함수 (ReLU 등): 비선형성을 추가해 학습 능력을 강화합니다.
+3. 다시 선형 변환: $\mathbb{R}^{d_{\text{hidden}}} \to \mathbb{R}^d$
+   - embedding의 차원을 원래대로 되돌립니다.
+
+##### **SASRec에서의 활용**
+- $\mathsf{F}^{(b)} = \text{FFN}(\mathsf{S}^{(b)})$
+  - self-attention의 출력을 입력으로 받아, 각 아이템 embedding을 독립적으로 변환합니다.
+- self-attention은 관계를 학습하지만, feed-forward network는 개별 아이템의 표현을 풍부하게 만드는 역할을 합니다.
+
+#### **직관적인 이해**
+예를 들어, self-attention에서 "어떤 아이템이 중요하다"는 관계 정보를 학습했다면, feed-forward network는 이 정보를 바탕으로 해당 아이템 embedding을 더 복잡하고 유용한 형태로 바꿉니다.
+
+---
+
+#### 요약
+- **Positional Embedding Matrix**는 sequence의 순서 정보를 모델에 전달하기 위해 사용됩니다.
+- **Feed-Forward Network**는 self-attention 이후 각 아이템 embedding을 더 정교한 표현으로 변환하는 역할을 합니다.
+
+## a. Embedding Layer
+Training sequence $\mathcal{S}^{u}$를 고정 길이 $n$의 수열로 변환할 때, $\mathcal{S}^{u} = (s_1, s_2, \dots, s_n)$로 설정된다. 데이터가 $n$을 초과하면 최근 $n$개 항목만 유지해 sequence 길이를 제한함. 각 $s_i$에 대해 아이템 embedding vector가 생성되며, positional embedding matrix $\mathsf{P}$가 사용되어 위치 정보를 추가함.
+
+이때 embedding layer의 전체 출력은
+
+$$
+\hat{\mathsf{E}} = \mathsf{E} + \mathsf{P}
+$$
+
+다시 정리하면,
+- $\mathsf{E} \in \mathbb{R}^{n \times d}$는 아이템 embedding matrix에서 생성된 아이템의 embedding
+- $\mathsf{P} \in \mathbb{R}^{n \times d}$는 positional embedding matrix로, 각 위치의 고유한 위치 정보를 제공
+
+따라서,
+$$
+\hat{\mathsf{E}} = [\mathsf{M}_{s_1} + \mathsf{P}_1; \mathsf{M}_{s_2} + \mathsf{P}_2; \dots; \mathsf{M}_{s_n} + \mathsf{P}_n]
+$$
+
+이 식은 각 위치 $i$에서 아이템 embedding $\mathsf{M}_{s_i}$와 위치 embedding $\mathsf{P}_i$를 더해 sequence의 최종 embedding $\hat{\mathsf{E}}$을 형성함.
+
+논문 작성자가 fixed positional embedding을 시도했으나, 실험 결과 dynamic positional embedding(위치마다 학습된 embedding)을 사용하는 것이 더 나은 성능을 보여준다고 보고했음. 이는 SASRec에서 sequence 내에서 각 위치에 맞는 특성을 학습하는 데 도움이 되었다고 볼 수 있음.
 
