@@ -204,3 +204,103 @@ $$
 - $\mathsf{M}$은 **masking matrix**로, 이후 시점의 정보를 차단하는 역할을 한다. 예를 들어, $M_{ij} = -\infty$로 설정하면, softmax 계산에서 해당 위치의 값이 0으로 설정됨.
 - 이로 인해 모델은 과거 정보에만 집중하며, 미래 정보를 포함하지 않도록 보장됨.
 
+### Layer Normalization
+
+신경망 훈련을 안정화하기 위해 사용되며, 각 레이어의 입력을 정규화하는 과정임. 이 정규화는 같은 레이어의 특성 차원에 따라 이루어짐.
+
+수식은 다음과 같음
+
+$$
+\text{LayerNorm}(x) = \frac{x - \mu}{\sigma} \cdot \gamma + \beta
+$$
+
+- $x$: 정규화 대상 (레이어의 입력).
+- $\mu$: 입력 $x$의 평균, $\mu = \frac{1}{d} \sum_{i=1}^{d} x_i$.
+- $\sigma$: 입력 $x$의 표준편차, $\sigma = \sqrt{\frac{1}{d} \sum_{i=1}^{d} (x_i - \mu)^2}$.
+- $\gamma$, $\beta$: 학습 가능한 파라미터로, 정규화된 결과를 재조정(scale & shift)
+
+#### Batch Normalization과의 비교
+1. 정규화 방식:
+   - **Batch Normalization**: 같은 배치(batch) 내에서 각 특성을 기준으로 정규화
+   - **Layer Normalization**: 같은 레이어 내에서 모든 특성을 기준으로 정규화
+
+2. **적용 대상**:
+   - Batch Normalization은 배치 크기(batch size)에 따라 민감하게 반응하며, 주로 CNN과 같은 구조에서 효과적
+   - Layer Normalization은 RNN, Transformer와 같이 시퀀셜 데이터에서 더 효과적입니다. 이는 배치 크기에 의존하지 않기 때문
+
+3. **연산 방식**:
+   - Batch Normalization은 미니 배치에서 계산된 평균과 분산을 사용
+   - Layer Normalization은 개별 입력 데이터의 평균과 분산을 사용
+
+### Dropout
+
+과적합(overfitting)을 방지하기 위해 사용하는 방법임. 훈련 중 뉴런의 일부를 랜덤하게 비활성화(drop)하여 모델이 특정 뉴런에 과도하게 의존하지 않도록 만듦
+
+$$
+h_i^{(dropped)} = h_i \cdot m_i
+$$
+
+- $h_i$: 드롭아웃 적용 전 뉴런 값.
+- $m_i$: 드롭 마스크(drop mask)로, $\text{Bernoulli}(p)$ 분포에서 샘플링된 값 ($p$: 뉴런을 유지할 확률).
+- $h_i^{(dropped)}$: 드롭아웃 적용 후 뉴런 값.
+
+드롭아웃은 테스트 단계에서는 적용되지 않고, 훈련 중에만 활성화됨
+
+## d. Prediction Layer
+
+Self-attention 블록을 거치면서 점진적으로 학습된 데이터는 **점수 예측**을 위해 사용됨. 최종 점수 $r_{i,t}$는 다음과 같은 수식으로 계산됨:
+
+$$
+r_{i,t} = \mathsf{F}_t^b \cdot \mathsf{N}_i^t
+$$
+
+여기서:
+- $\mathsf{F}_t^b$: self-attention 블록 $b$에서 나온 $t$ 시점의 사용자 시퀀스 embedding.
+- $\mathsf{N}_i^t$: 아이템 $i$의 embedding.
+- 이 내적(dot product)을 통해, 사용자가 아이템 $i$를 얼마나 선호할 가능성이 있는지 예측함.
+
+즉, self-attention에서 학습된 시퀀스 정보와 아이템 embedding 간의 관계를 점수로 환산해 추천에 사용함.
+
+## e. Network Training
+
+모델 학습에는 **Cross-Entropy Loss**를 사용함. 이때 목표는 사용자가 실제로 선택한 아이템(positive sample)과 그렇지 않은 아이템(negative sample)을 구분하는 것. 수식은 다음과 같음:
+
+$$
+\mathcal{L} = - \sum_{(u,i) \in \mathcal{D}} \left[ \log \sigma(r_{i,t}) + \sum_{j \in \mathcal{N}} \log(1 - \sigma(r_{j,t})) \right]
+$$
+
+여기서:
+- $\mathcal{D}$: 훈련 데이터 (사용자와 아이템 간의 interaction 쌍).
+- $\mathcal{N}$: negative samples (사용자가 선택하지 않은 아이템들).
+- $\sigma$: sigmoid 함수.
+
+이 loss는 실제 선택된 아이템과 선택되지 않은 아이템 간의 점수 차이를 학습하도록 유도함.
+
+## f. Complexity Analysis
+
+모델의 복잡도를 분석한 결과, SASRec의 효율성이 높게 나옴. self-attention 기반 연산의 주요 복잡도는 다음과 같음:
+
+1. **Self-Attention Complexity**: $O(n^2 d)$
+   - $n$: 시퀀스 길이.
+   - $d$: embedding 차원.
+
+2. **Feed-Forward Network Complexity**: $O(nd^2)$
+
+실제 계산량은 시퀀스 길이 $n$에 따라 늘어나지만, sparse 데이터에서는 여전히 빠르게 동작함. SASRec은 기존 RNN 기반 모델보다 더 낮은 복잡도를 가짐.
+
+## g. Discussion
+
+논문 마지막에서는 SASRec의 특징과 장단점에 대해 논의함:
+
+1. **장점**:
+   - self-attention을 사용해 시퀀스 내에서 중요한 아이템 간 관계를 학습함.
+   - CNN이나 RNN 같은 구조 없이도 long-term dependency를 효율적으로 처리함.
+   - sparse한 데이터와 dense한 데이터 모두에서 성능이 우수함.
+
+2. **단점 및 한계**:
+   - self-attention 연산이 $O(n^2)$의 시간 복잡도를 가지므로, 시퀀스 길이가 매우 긴 경우 성능 저하 가능.
+   - Negative sampling에서 샘플링 전략에 따라 학습 성능이 달라질 수 있음.
+
+3. **미래 연구 방향**:
+   - 더 긴 시퀀스에서도 효율적으로 작동할 수 있도록 self-attention을 개선할 방법 탐구.
+   - negative sampling 기법의 최적화를 통한 모델 성능 개선.
