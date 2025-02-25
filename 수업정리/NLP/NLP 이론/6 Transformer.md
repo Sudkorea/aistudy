@@ -101,3 +101,7 @@ Query/Key 벡터 길이만큼 출력값의 분산값을 줄임
 	Transformer 블록은 Permutation invariant이므로, 같은 단어로 이루어졌어도 어순을 구별하도록 해야함.
 	순서를 어떻게 주냐? 서로 다른 주파수 가진 Sinusoidal function 활용함. (sin, cos 삼각함수들 더해서 쓰는거보니까 Fourier Transform의 일종인가?)
 - Transformer decoder의 Masked self-attention & Cross attention
+	Masked self-attention
+	비트코인 가격예측 플젝했을때랑 같음. 이후 정보 끌어와서 예측하는게 대체 무슨 의미가 있나? 해서 시간 이후의 내용을 아예 참조 못하게 가려버리는거임. 이러면 행렬 Row echelon form의 transpose 형태로 변함.
+	Cross Attention
+	
