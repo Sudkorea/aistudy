@@ -88,3 +88,16 @@ Query/Key 벡터 길이만큼 출력값의 분산값을 줄임
 
 누군 문맥 보고, 누군 문법상 중요한거 보고 이런거임
 
+![[[NLP 이론] (8강) Transformer 2.pdf]]
+
+- Transformer block의 여러 구성 요소 
+	더 이상 RNN, CNN 모듈을 사용하지 않음
+	Multi-Head self-attention -> Add & Norm(Batch Normalization) -> Feed Forward -> Add & Norm
+	Layer Normalization은 결국 정규분포꼴로 정규화시키는듯?
+
+
+- Positional embedding의 필요성과 Sinusoidal positional embedding
+	(Input Embedding -> Positional Encoding) ->단계가 더해짐
+	Transformer 블록은 Permutation invariant이므로, 같은 단어로 이루어졌어도 어순을 구별하도록 해야함.
+	순서를 어떻게 주냐? 서로 다른 주파수 가진 Sinusoidal function 활용함. (sin, cos 삼각함수들 더해서 쓰는거보니까 Fourier Transform의 일종인가?)
+- Transformer decoder의 Masked self-attention & Cross attention
