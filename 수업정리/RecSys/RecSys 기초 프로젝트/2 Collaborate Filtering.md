@@ -63,5 +63,73 @@ Deviation 써서 정규화시켜버리는거
 4. LImited Coverage 극복함
    유저 기반은 유저 없으면 좀 힘든데, 이건 괜찮음
 
+## Feedback
 
-## Hybrid
+### Explicit Feedback
+영화 평점, 레이팅 등 직접적으로 알 수 잇는 데이터
+
+### Implicit Feedback
+암시적인, 클릭 여부, 시청했나 등 간접적으로만 알 수 있는 데이터
+
+## Latent Factor Model
+유저와 아이템 관계를 잠재적 요인으로 표현
+
+
+# SVD(Singular Vector Decomposition)
+
+선대의 eigenvalue로 분해하는 ㅜ머 그런것들
+
+### 한계점
+분해하려는 행렬의 Knowledge 불완전하면 정의가 안됨
+따라서, 결측된 entry를 전부 채워줘야함 -> 연산량 증가
+
+
+# MF
+User-Item의 Latent factor 행렬곱으로 분해하는 법
+
+## 정규화
+
+왜 하나? 확률적 경사하강법(SGD) 사용해서 rate 업데이트함.
+
+
+### L1
+
+
+### L2
+
+## +$\alpha$
+
+### Adding Biases
+아이템이나 유저도 편향이 생길 수 있음. 그 편향을 구해줘서 조정하는거임.
+
+### Adding Confidence Level
+모든 평점이 신뢰도가 같지 않아서, 신뢰도 추가해주는거.(광고같이 특정 의도를 가진 평점이라거나, 테러하는 유저라던가..)
+
+### Adding Temporal Dynamics
+시간에 따라 변하는 유저, 아이템 특성 반영
+
+
+# ML for Implicit Feedback
+
+그래서 implicit Feedback을 머신러닝 모델에 어떻게 넣어야 하나?
+
+## Alternative Least Square(ALS)
+Sparse한 데이터에 대해 SGD보다 더 Robust함
+대용량 데이터 병렬처리하여 빠른 학습 가능
+
+유저 P와 아이템 Q를 번갈아가며 업데이트함.
+
+### 목적함수
+
+# Bayesian Personalized Ranking
+사용자한테 순서가 있는 아이템 리스트 제공
+
+
+## Maximum A Posterior(최대 사후 확률 추정)
+평점 예측값과 실제 값의 차이를 시그모이드에 넣어서 다 곱해버림
+
+## LEARNBPR
+Bootstrap 기반의 SGD 사용함.
+선호 데이터와 선호하지 않는 negative sampling 동일 비율로 섞어서 랜덤샘플링하는거인ㄷ긋?
+
+
