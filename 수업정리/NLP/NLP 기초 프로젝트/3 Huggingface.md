@@ -30,6 +30,8 @@ padding 쓸건지 말건지 등등등
 
 ### Tansformers
 
+
+
 ### PEFT(Parameter Efficient Fine Tuning)
 개인 환경에서 돌려보려면 최적화 해야하니까, 그거 도와주는 툴임
 ### Bitsandbytes(META)
