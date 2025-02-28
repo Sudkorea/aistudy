@@ -14,7 +14,37 @@ pytorch <-> tensorflow 양방향 바꿔주는 툴로 시작했지만, 지금은 
 ## Data
 
 ### datasets
-
+이거저거 데이터 다 클라우드에 관리하고, 다 써보라고 줌. 미친빛빛빛GODGODGODGOD
+데이터 불러와서
+tokenizer 하고
+dataset mapping 해서
+datacollator까지
+이걸 다해줌
 ### Tokenizer
-
+모델마다 맞는 토큰이 있음. 검색해보고 쓸것
+padding 쓸건지 말건지 등등등
 ### dataCollator
+
+
+## Model
+
+### Tansformers
+
+### PEFT(Parameter Efficient Fine Tuning)
+개인 환경에서 돌려보려면 최적화 해야하니까, 그거 도와주는 툴임
+### Bitsandbytes(META)
+
+## Training
+
+### Trainer
+train할때 이것저것 다 건드려볼 수 있음
+### accerlate
+분산학습
+## Evaluate
+
+### evaluate
+
+## Share
+
+### pipeline
+
