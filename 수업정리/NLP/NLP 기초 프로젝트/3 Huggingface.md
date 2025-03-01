@@ -34,6 +34,8 @@ padding 쓸건지 말건지 등등등
 
 ### PEFT(Parameter Efficient Fine Tuning)
 개인 환경에서 돌려보려면 최적화 해야하니까, 그거 도와주는 툴임
+
+양자화가 여기서?
 ### Bitsandbytes(META)
 
 ## Training
@@ -41,7 +43,7 @@ padding 쓸건지 말건지 등등등
 ### Trainer
 train할때 이것저것 다 건드려볼 수 있음
 ### accerlate
-분산학습
+병렬 컴퓨팅 도와주는 프레임워크
 ## Evaluate
 
 ### evaluate
