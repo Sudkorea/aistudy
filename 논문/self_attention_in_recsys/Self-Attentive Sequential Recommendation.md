@@ -54,7 +54,7 @@ Netflix prize로 거슬러 올라가면, 임시적인 추천은 timestamp of use
 
 
 ## c. Sequential Recommendation
-이 부분이 sequence라는 개념을 어디서 갖다쓴건지 저번 강의 들을때 헷갈렸었음. 아이템을 통해 다음 아이템을 계속해서 추천하는 것이 sequence a_1, a_2, ... 와 같은 귀납적 정의와 닮아있어서 그럼)
+이 부분이 sequence라는 개념을 어디서 갖다쓴건지 저번 강의 들을때 헷갈렸었음. 아이템을 통해 다음 아이템을 계속해서 추천하는 것이 sequence $a_1$, $a_2$, ... 와 같은 귀납적 정의와 닮아있어서 그럼)
 
 For instance, FPMC fuses an MF term and an item-item transition term to capture long-term preferences and short-term transitions respectively (여기서 "fuses"라는 말은 두 가지 요소를 결합한다는 의미.) FPMC는 사용자의 장기 선호도를 표현하는 MF(Matrix Factorization) 요소와, 아이템 간 전환을 나타내는 item-item transition 요소를 결합하여, 장기적인 선호도와 단기적인 전환을 모두 포착하는 모델임. 사용자가 오랜 시간 좋아했던 아이템의 특성을 MF에, 최근에 상호작용한 아이템 특성(item-item transition)을 고려하여 다음 추천을 만듦.
 
