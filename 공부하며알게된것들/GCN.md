@@ -31,4 +31,4 @@ $$ \mathcal{L} = I - D^{\frac{1}{2}}AD^{\frac{1}{2}}$$
 
 
 
-Spectral Graph Convolution
+### Spectral Graph Convolution
