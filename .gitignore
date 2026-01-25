@@ -1,0 +1,18 @@
+# 관리자용 폴더 (외부 공개 불가)
+_private/
+resources/
+
+# Obsidian 설정
+.obsidian/
+
+# 시스템 파일
+.DS_Store
+*.swp
+*.swo
+*~
+
+# 임시 파일
+*.base
+*.canvas
+Untitled*
+
