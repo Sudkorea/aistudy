@@ -1,6 +1,12 @@
 # 관리자용 폴더 (외부 공개 불가)
 _private/
 resources/
+# 개인적인 폴더 (Remote 반영)
+자소서/
+면접준비/
+멘탈관리/
+자료/
+stuff/
 
 # Obsidian 설정
 .obsidian/
@@ -15,4 +21,3 @@ resources/
 *.base
 *.canvas
 Untitled*
-
